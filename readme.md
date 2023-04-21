@@ -24,3 +24,6 @@ Authentication App developed by Using modern # MVC architecture
 npm install
 
 npm start or npm run dev
+
+
+pending : forgot password  , update user details
