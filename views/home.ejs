@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- css -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <!-- js -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+    <!-- icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css"
+    />
+    <title>Home</title>
+    <style>
+      i {
+        cursor: pointer;
+      }
+      td {
+        padding: 0 10px 0 0;
+      }
+      #loader {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #home {
+        min-height: 100vh;
+        display: none;
+      }
+      nav {
+        position: static;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- loader -->
+    <div id="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <!-- home -->
+    <div id="home">
+      <nav
+        class="d-flex align-items-center text-capitalize justify-content-between ps-5 pe-5 shadow"
+      >
+        <a class="fw-bold">NavBar.</a>
+        <ul class="pt-3 d-flex justify-content-center align-items-center">
+          <span id="name" class="me-3 fw-bold">User</span>
+          <!-- <i class="bi bi-x-lg ms-2 me-4 fw-bold fs-3 text-danger"></i> -->
+          <!-- <i onclick="logout()" class="bi bi-box-arrow-right fw-bold fs-1"></i> -->
+          <span onclick="deleteAccount()" class="text-danger fw-bold btn"
+            >delete</span
+          >
+          <span onclick="logout()" class="text-danger fw-bold btn">Logout</span>
+        </ul>
+      </nav>
+      <div
+        class="d-flex flex-column justify-content-center align-items-center pt-3"
+      >
+        <table id="maintable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>verified</th>
+            </tr>
+          </thead>
+          <tbody id="table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script defer>
+      function eachRow(each) {
+        const { name, email, is_verified } = each;
+        const tableBody = document.getElementById("table");
+
+        const tableRow = document.createElement("tr");
+        tableBody.appendChild(tableRow);
+
+        const tableName = document.createElement("td");
+        tableName.textContent = name;
+        tableRow.appendChild(tableName);
+        const tableEmail = document.createElement("td");
+        tableEmail.textContent = email;
+        tableRow.appendChild(tableEmail);
+        const tableVerified = document.createElement("td");
+        tableVerified.textContent = is_verified;
+        tableRow.appendChild(tableVerified);
+      }
+      if (localStorage.getItem("token") === null) {
+        localStorage.removeItem("token");
+        window.location.replace("/login");
+      }
+      let token = localStorage.getItem("token");
+      // api call for data
+      (async function () {
+        const res = await fetch("/users/profile", {
+          method: "GET",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          loader.setAttribute("class", "d-none");
+          home.setAttribute("class", "d-block");
+          const nameEl = document.getElementById("name");
+          nameEl.textContent = data.name;
+        }
+      })();
+      // api call for profiles
+      (async function () {
+        const res = await fetch("/users/all/profiles", {
+          method: "GET",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          console.log(data);
+          loader.setAttribute("class", "d-none");
+          home.setAttribute("class", "d-block");
+          const maintable = document.getElementById("maintable");
+          if (data.length == 0) {
+            maintable.classList.add("d-none");
+          } else {
+            maintable.classList.add("d-block");
+          }
+          for (let index = 0; index < data.length; index++) {
+            const element = data[index];
+            eachRow({
+              name: element.name,
+              email: element.email,
+              is_verified: element.is_verified,
+            });
+          }
+        }
+      })();
+      async function deleteAccount() {
+        const res = await fetch("/users/delete", {
+          method: "DELETE",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        });
+        localStorage.removeItem("token");
+        window.location.replace("/login");
+      }
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.replace("/login");
+      }
+    </script>
+  </body>
+</html>

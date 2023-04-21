@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- css -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <!-- js -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+    <!-- title -->
+    <title>Signup</title>
+  </head>
+  <body>
+    <div
+      class="container-fluid bg-dark min-vh-100 d-flex justify-content-center align-items-center"
+    >
+      <form
+        id="myForm"
+        class="row g-3 text-white d-flex justify-content-center align-items-center"
+      >
+        <!-- title -->
+        <div class="col-md-12">
+          <h1 class="text-capitalize text-center">Authentication</h1>
+        </div>
+        <!-- name -->
+        <div class="col-md-8">
+          <label for="inputEmail4" class="form-label">Full Name</label>
+          <input
+            type="name"
+            class="form-control"
+            required
+            name="name"
+            id="inputName4"
+          />
+        </div>
+
+        <!-- age -->
+        <div class="col-md-8">
+          <label for="inputEmail4" class="form-label">Age</label>
+          <input
+            type="number"
+            class="form-control"
+            required
+            name="age"
+            id="inputAge4"
+          />
+        </div>
+        <!-- email -->
+        <div class="col-md-8">
+          <label for="inputEmail4" class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            required
+            name="email"
+            id="inputEmail4"
+          />
+        </div>
+        <!-- password -->
+        <div class="col-md-8">
+          <label for="inputPassword4" class="form-label">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            required
+            name="password"
+            id="inputPassword4"
+          />
+          <a href="/login">Login </a>
+        </div>
+        <div class="col-md-8">
+          <p class="text-success text-danger" id="errormsg"></p>
+        </div>
+        <!-- button -->
+        <div class="col-md-8">
+          <button id="signupBtn" type="submit" class="btn btn-primary">
+            Signup
+          </button>
+        </div>
+      </form>
+    </div>
+    <script defer>
+      const inputName4 = document.getElementById("inputName4");
+      const inputAge4 = document.getElementById("inputAge4");
+      const inputEmail4 = document.getElementById("inputEmail4");
+      const inputPassword4 = document.getElementById("inputPassword4");
+      const myForm = document.getElementById("myForm");
+      const errormsg = document.getElementById("errormsg");
+      const signupBtn = document.getElementById("signupBtn");
+
+      myForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          errormsg.textContent = "";
+
+          const res = await fetch("/users/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: inputName4.value,
+              age: inputAge4.value,
+              email: inputEmail4.value,
+              password: inputPassword4.value,
+            }),
+          });
+
+          if (res.ok) {
+            errormsg.classList.toggle("text-danger");
+            errormsg.textContent = "You have been sent verification mail.";
+
+            inputName4.value = "";
+            inputAge4.value = "";
+            inputEmail4.value = "";
+            inputPassword4.value = "";
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 3000);
+          } else {
+            const data = await res.json();
+            errormsg.classList.add("text-danger");
+            errormsg.textContent = data.msg;
+          }
+        } catch (error) {
+        } finally {
+        }
+      });
+    </script>
+  </body>
+</html>
